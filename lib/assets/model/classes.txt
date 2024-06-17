@@ -1,0 +1,6 @@
+dni_front
+dni_back
+card_front
+card_back
+id_front
+id_back
