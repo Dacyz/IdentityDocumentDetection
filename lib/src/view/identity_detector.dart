@@ -4,19 +4,24 @@ import 'dart:isolate';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:identity_document_detection/src/controller/detector_service.dart';
+import 'package:identity_document_detection/src/model/options.dart';
 import 'package:identity_document_detection/src/model/screen_params.dart';
 import 'package:identity_document_detection/src/view/widgets/box_widget.dart';
 
-/// [DetectorWidget] sends each frame for inference
-class DetectorWidget extends StatefulWidget {
+/// [IdentityDetector] sends each frame for inference
+class IdentityDetector extends StatefulWidget {
   /// Constructor
-  const DetectorWidget({super.key});
+  const IdentityDetector({
+    super.key,
+    this.options = IDOptions.byDefault,
+  });
+  final IDOptions options;
 
   @override
-  State<DetectorWidget> createState() => _DetectorWidgetState();
+  State<IdentityDetector> createState() => _IdentityDetectorState();
 }
 
-class _DetectorWidgetState extends State<DetectorWidget> with WidgetsBindingObserver {
+class _IdentityDetectorState extends State<IdentityDetector> with WidgetsBindingObserver {
   /// List of available cameras
   late List<CameraDescription> cameras;
 
@@ -27,9 +32,9 @@ class _DetectorWidgetState extends State<DetectorWidget> with WidgetsBindingObse
   CameraController get _controller => _cameraController!;
 
   /// Object Detector is running on a background [Isolate]. This is nullable
-  /// because acquiring a [Detector] is an asynchronous operation. This
+  /// because acquiring a [IDController] is an asynchronous operation. This
   /// value is `null` until the detector is initialized.
-  Detector? _detector;
+  IDController? _detector;
   StreamSubscription? _subscription;
   CustomPaint? _customPaint;
 
@@ -44,11 +49,10 @@ class _DetectorWidgetState extends State<DetectorWidget> with WidgetsBindingObse
     // initialize preview and CameraImage stream
     _initializeCamera();
     // Spawn a new isolate
-    final detector = await Detector.start();
+    final detector = await IDController.initialize(widget.options);
     _detector = detector;
-    setState(() {});
-    _subscription = detector.resultsStream.stream.listen((values) {
-      final painter = ObjectDetectorPainter(values['recognitions'] ?? []);
+    _subscription = detector.stream.listen((values) {
+      final painter = ObjectDetectorPainter(values);
       _customPaint = CustomPaint(painter: painter);
       setState(() {});
     });
@@ -59,7 +63,7 @@ class _DetectorWidgetState extends State<DetectorWidget> with WidgetsBindingObse
     cameras = await availableCameras();
     // cameras[0] for back-camera
     _cameraController = CameraController(
-      cameras[1],
+      cameras[0],
       ResolutionPreset.medium,
       enableAudio: false,
     )..initialize().then((_) async {
@@ -75,6 +79,7 @@ class _DetectorWidgetState extends State<DetectorWidget> with WidgetsBindingObse
 
   @override
   Widget build(BuildContext context) {
+    ScreenParams.screenSize = MediaQuery.sizeOf(context);
     // Return empty container while the camera is not initialized
     if (_cameraController == null || !_controller.value.isInitialized) {
       return const SizedBox.shrink();

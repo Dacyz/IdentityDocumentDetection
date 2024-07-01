@@ -1,3 +1,8 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Initial release.
+* Document listener driver using events.
+* Support for multiple document types.
+* Cross-platform support for iOS and Android.
+* Position and address of the document.
+* Exception handling.

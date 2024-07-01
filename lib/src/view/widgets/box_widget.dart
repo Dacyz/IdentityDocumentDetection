@@ -1,62 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:identity_document_detection/src/model/recognition.dart';
+import 'package:identity_document_detection/src/model/identity_document.dart';
 import 'dart:ui' as ui;
 
-
-/// Individual bounding box
-class BoxWidget extends StatelessWidget {
-  final Recognition result;
-
-  const BoxWidget({super.key, required this.result});
-
-  @override
-  Widget build(BuildContext context) {
-    // Color for bounding box
-    Color color =
-        Colors.primaries[(result.label.length + result.label.codeUnitAt(0) + result.id) % Colors.primaries.length];
-
-    return Positioned(
-      left: result.renderLocation.left,
-      top: result.renderLocation.top,
-      width: result.renderLocation.width,
-      height: result.renderLocation.height,
-      child: Container(
-        width: result.renderLocation.width,
-        height: result.renderLocation.height,
-        decoration: BoxDecoration(
-            border: Border.all(color: color, width: 3), borderRadius: const BorderRadius.all(Radius.circular(2))),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: FittedBox(
-            child: Container(
-              color: color,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(result.label),
-                  Text(" ${result.score.toStringAsFixed(2)}"),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class ObjectDetectorPainter extends CustomPainter {
-  ObjectDetectorPainter(
-    this._objects,
-    // this.imageSize,
-    // this.rotation,
-    // this.cameraLensDirection,
-  );
+  ObjectDetectorPainter(this._objects);
 
-  final List<Recognition> _objects;
-  // final Size imageSize;
-  // final InputImageRotation rotation;
-  // final CameraLensDirection cameraLensDirection;
+  final List<IdentityDocument> _objects;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -66,10 +15,15 @@ class ObjectDetectorPainter extends CustomPainter {
       ..color = Colors.lightGreenAccent;
 
     final Paint background = Paint()..color = const Color(0x99000000);
+    final validation = _objects.length > 1;
     Paint currentPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
       ..color = Colors.grey;
+    if (validation) {
+      paint.color = Colors.redAccent;
+      currentPaint.color = Colors.redAccent;
+    }
 
     final verticalTopPoint = size.height * .10;
     final verticalBottomPoint = size.height * .90;
@@ -77,14 +31,14 @@ class ObjectDetectorPainter extends CustomPainter {
     final horizontalRightPoint = size.width * .90;
     const augment = 32;
 
-    for (final Recognition detectedObject in _objects) {
+    for (final IdentityDocument detectedObject in _objects) {
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
         ui.ParagraphStyle(textAlign: TextAlign.left, fontSize: 16, textDirection: TextDirection.ltr),
       );
       builder.pushStyle(ui.TextStyle(color: Colors.lightGreenAccent, background: background));
       if (detectedObject.label.isNotEmpty) {
         // final label = detectedObject.labels.reduce((a, b) => a.confidence > b.confidence ? a : b);
-        builder.addText('${detectedObject.label} ');
+        builder.addText('${detectedObject.label} \n${detectedObject.score}');
         // builder.addText('${label.text} ${label.confidence}');
       }
       builder.pop();
@@ -92,26 +46,21 @@ class ObjectDetectorPainter extends CustomPainter {
       final left = detectedObject.renderLocation.left;
       final top = detectedObject.renderLocation.top;
       final right = detectedObject.renderLocation.right;
-      final bottom = detectedObject.renderLocation.bottom;
-
-      canvas.drawRect(
-        Rect.fromLTRB(left, top, right, bottom),
-        paint,
-      );
 
       bool isLeftCentered = left > size.width * .05 && left < size.width * .25;
       bool isRightCentered = right > size.width * .75 && right < size.width * 1.05;
-      currentPaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.0
-        ..color = isLeftCentered && isRightCentered ? Colors.lightGreenAccent : Colors.grey;
 
+      if (!validation) {
+        currentPaint = currentPaint..color = isLeftCentered && isRightCentered ? Colors.lightGreenAccent : Colors.grey;
+      }
+
+      canvas.drawRect(detectedObject.renderLocation, paint);
       canvas.drawParagraph(
         builder.build()
           ..layout(ui.ParagraphConstraints(
             width: (right - left).abs(),
           )),
-        Offset( left, top),
+        Offset(right, top),
       );
     }
 

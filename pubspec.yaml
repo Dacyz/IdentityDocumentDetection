@@ -1,21 +1,26 @@
 name: identity_document_detection
-description: "A new Flutter package project."
+description: "Use tensor flow lite for detect identity documents on mobile devices"
 version: 0.0.1
-homepage:
+homepage: https://github.com/Dacyz/IdentityDocumentDetection
 
 environment:
   sdk: ">=3.4.3 <4.0.0"
   flutter: ">=1.17.0"
 
+# tflite_flutter: Permite ejecutar modelos de aprendizaje automático en dispositivos móviles.
+# camera: Proporciona un enfoque unificado para grabar y reproducir video desde la cámara del dispositivo móvil.
+# image: Proporciona una forma de manejar imágenes en Flutter.
+# path_provider: Proporciona acceso a la ubicación de almacenamiento en el dispositivo móvil.
+# exif: Proporciona información de metadatos de imágenes.
 dependencies:
-  tflite_flutter: ^0.10.4
-  camera: ^0.10.5+2
-  image: ^4.0.17
-  path_provider: ^2.0.15
-  image_picker: ^1.0.0
-  exif: ^3.1.4
   flutter:
     sdk: flutter
+
+  tflite_flutter: ^0.10.4 # Aprendizaje automático en dispositivos móviles
+  camera: ^0.10.5+2 # Grabar y reproducir video desde la cámara del dispositivo móvil
+  image: ^4.0.17 # Manejo de imágenes en Flutter
+  path_provider: ^2.0.15 # Acceso a la ubicación de almacenamiento en el dispositivo móvil
+  exif: ^3.1.4 # Información de metadatos de imágenes
 
 dev_dependencies:
   flutter_test:

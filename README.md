@@ -1,39 +1,86 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Identity Document Detection
+Use tensor flow lite for detect identity documents on mobile devices
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
+## Platform Support
+> NOTE: The package maybe add support on future.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+|             | Android | iOS   | macOS  | Windows | Linux |
+|-------------|---------|-------|--------|---------|-------|
+| **Support** | ✔ | ✔ | ✖ | ✖ | ✖ | 
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+Use this plugin in your Flutter app to:
+
+* Not required network connection.
+* Run on single image and real time.
+* **Detect type** of a card.
+* **Detect side** of document.
+* **Detect position** on image.
+
+> on future must detect brightness and sharpness
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+1.  Add `identity_document_detection` to your `pubspec.yaml`:
+
+    ```yaml
+    dependencies:
+      identity_document_detection: latest_version
+    ```
+
+2.  Run `flutter pub get` to install.
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+You have 2 ways to use it:
+1. Using the `IdentityDetector` widget
+```dart
+class DetectorPage extends StatelessWidget {
+  const DetectorPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: IdentityDetector(
+        options: IDOptions(
+          confidence: 0.85,
+          detection: IDTypeDetection.multiple,
+          onDocumentDetect: (recognitions) {
+            // TODO: Add your own logic here
+          },
+        ),
+      ),
+    );
+  }
+}
+```
+2. Creating `IDController` and initializing it
 
 ```dart
-const like = 'sample';
+final detector = await IDController.initialize(widget.options);
+_detector = detector;
+_subscription = detector.stream.listen((values) {
+  final painter = ObjectDetectorPainter(values);
+  _customPaint = CustomPaint(painter: painter);
+  setState(() {});
+});
+```
+Callback to receive each frame `CameraImage` perform inference on it
+```dart
+void onImageAvailable(CameraImage cameraImage) async {
+  _detector?.processFrame(cameraImage);
+}
+```
+And for dispose you should use
+```dart
+_detector?.stop();
 ```
 
-## Additional information
+> [!IMPORTANT]
+> For now the package adds a high weight to the project, it must be taken into
+> consideration when taking it to stores, this will improve in the future.
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+## Coming soon
+* **Detect brightness** on image.
+* **Detect sharpness** on document.
