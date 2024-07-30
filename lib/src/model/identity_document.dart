@@ -28,4 +28,21 @@ class IdentityDocument extends Recognition {
     }
     return IdentityDocumentType.other;
   }
+
+  String get sideString {
+    if (side == IdentityDocumentSide.front) {
+      return 'Front';
+    }
+    return 'Back';
+  }
+
+  String get typeString {
+    if (type == IdentityDocumentType.dni) {
+      return 'DNI';
+    }
+    if (type == IdentityDocumentType.card) {
+      return 'Card';
+    }
+    return 'Other';
+  }
 }

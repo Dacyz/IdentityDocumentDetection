@@ -1,6 +1,9 @@
 # Identity Document Detection
 Use tensor flow lite for detect identity documents on mobile devices
 
+> [!IMPORTANT]
+> Not use it on production
+
 ## Platform Support
 > NOTE: The package maybe add support on future.
 

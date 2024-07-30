@@ -7,7 +7,7 @@ enum IDTypeDetection { singular, multiple }
 class IDOptions {
   const IDOptions({
     required this.confidence,
-    this.detection = IDTypeDetection.singular,
+    this.detection = IDTypeDetection.multiple,
     this.onDocumentDetect,
   });
   final double confidence;
